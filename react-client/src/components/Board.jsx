@@ -26,7 +26,7 @@ class Board extends Component {
      let dayRange = open + '-' + lastClose;
 
      this.setState({ mainPrice: lastClose, prevClose: previousClose, openPrice: open, priceRange: dayRange, diff: diff});
-     console.log('main price', this.state.mainPrice)
+
   }
 
   render() {

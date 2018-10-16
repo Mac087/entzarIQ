@@ -41,7 +41,7 @@ class Login extends Component {
         }
         // Decode token to get user data
         const decoded = jwt_decode(token);
-        console.log(decoded);
+        //console.log(decoded);
         redirect.push('/dashboard');
       })
       .catch(err => console.log(err));

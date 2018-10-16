@@ -7,8 +7,8 @@ import Bar from './Bar.jsx';
 
 class Dashboard extends Component {
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       firstName: '',
       lastName: '',
@@ -24,6 +24,7 @@ class Dashboard extends Component {
       marketClose: '',
       timezone: '',
       currency: '',
+      graphName: 'Intraday',
       graphTime: [],
       graphPrice: [],
       tablePreviousPrices: []
@@ -33,6 +34,7 @@ class Dashboard extends Component {
     this.onSubmit = this.onSubmit.bind(this);
     this.searchList = this.searchList.bind(this);
     this.handleClick = this.handleClick.bind(this);
+    this.handleBarEvent = this.handleBarEvent.bind(this);
 
   }
 
@@ -46,6 +48,39 @@ class Dashboard extends Component {
   // onDeleteClick(e) {
   //   this.props.deleteAccount();
   // }
+
+  queryBuilder(graphType, symbol) {
+
+    let queryType, queryInterval, objProp, interval;
+
+    if(graphType === 'Intraday') {
+      queryType = 'TIME_SERIES_INTRADAY';
+      queryInterval = '5min';
+      objProp = 'Time Series (5min)';
+      interval = '&interval=';
+    }
+
+    if(graphType === 'Weekly') {
+      queryType = 'TIME_SERIES_WEEKLY';
+      objProp = 'Weekly Time Series';
+      queryInterval = '';
+      interval = '';
+    }
+
+    if(graphType === 'Monthly') {
+      queryType = 'TIME_SERIES_MONTHLY';
+      objProp = 'Monthly Time Series';
+      queryInterval = '';
+      interval = '';
+    }
+
+    return {
+      query: `https://www.alphavantage.co/query?function=${queryType}&symbol=${symbol + interval + queryInterval}&apikey=${AA}`,
+      objProp: objProp
+    }
+    
+    
+  }
 
   onChange(e) {
     this.setState({ selection: false });
@@ -83,14 +118,13 @@ class Dashboard extends Component {
       currency: bestMatches[i]['8. currency']
     });
 
-    const queryType = 'TIME_SERIES_INTRADAY';
-    const queryInterval = '5min';
-    const query = `https://www.alphavantage.co/query?function=${queryType}&symbol=${symbol}&interval=${queryInterval}&apikey=${AA}`
-    console.log('query ', query);
-    
-    axios.get(query)
+    let query = this.queryBuilder('Intraday', symbol)
+
+    console.log(query);
+
+    axios.get(query.query)
         .then(res => {
-          this.handleData(res.data['Time Series (5min)']);
+          this.handleData(res.data[query.objProp]);
         })
         .catch(err =>console.log(err));
   }
@@ -107,7 +141,8 @@ class Dashboard extends Component {
     );
   }
 
-  handleData(data) {
+  handleData(data, graphName = 'Intraday') {
+    console.log('graph name ', graphName, ' - handle data ', data);
     let today = new Date();
     let dd = today.getDate();
     let mm = today.getMonth() + 1;
@@ -119,7 +154,6 @@ class Dashboard extends Component {
         mm = '0'+mm
     } 
     today = yyyy + '-' + mm + '-' + dd;
-    today = '2018-10-15';
 
     let timesArray = [];
     let closePriceArr = [];
@@ -127,14 +161,19 @@ class Dashboard extends Component {
 
     for (var prop in data) {
       if (data.hasOwnProperty(prop)) {
-        let dateKey = prop.slice(0,10);
-        if(dateKey === today){
-          timesArray.push('Time: ' + prop.slice(11, 16));
+        if(graphName === 'Intraday') {
+            let dateKey = prop.slice(0,10);
+            if(dateKey === today){
+              timesArray.push('Time: ' + prop.slice(11, 16));
+              closePriceArr.push(parseFloat(data[prop]['4. close'], 10));
+            } 
+            if(dateKey !== today){
+              previousCloseArr.push(parseFloat(data[prop]['4. close'], 10));
+            } 
+        } else {
+          timesArray.push('Date: ' + prop);
           closePriceArr.push(parseFloat(data[prop]['4. close'], 10));
-        } 
-        if(dateKey !== today){
-          previousCloseArr.push(parseFloat(data[prop]['4. close'], 10));
-        } 
+        }
       }
     }
 
@@ -148,13 +187,41 @@ class Dashboard extends Component {
     this.setState({ selection: true });
   }
 
+  handleBarEvent(e) {
+
+    let temp = e.target.value;
+  
+    e.preventDefault();
+
+    if(this.state.graphName !== e.target.value) {
+
+    this.setState({ [e.target.name]: e.target.value, selection: false });
+
+    console.log('e target value: ', e.target.value);
+    console.log('symbol for query: ', this.state.symbol);
+
+    let query = this.queryBuilder(temp, this.state.symbol);
+
+    console.log(query.query);
+
+    axios.get(query.query)
+        .then(res => {
+          this.handleData(res.data[query.objProp], temp);
+          console.log(res.data[query.objProp]);
+        })
+        .catch(err =>console.log(err));
+    
+    }
+    
+  }
+
   render() {
    
     return (
       <div className="dashboard">
         <div className="container">
 
-          <div className="row key">
+          <div className="row">
             <div className="col-md-8">
               <form noValidate onSubmit={this.onSubmit} className="form-inline">
                 <div className="form-group">
@@ -186,7 +253,7 @@ class Dashboard extends Component {
           {/* display graph and metrics on the side */}
           <div className="row graph">
             <div className="col-md-6">
-              {this.state.selection ?  <Graph times={this.state.graphTime} prices={this.state.graphPrice} company={this.state.name + ' (' + this.state.symbol + ')'}/> : ''}
+              {this.state.selection ?  <Graph times={this.state.graphTime} prices={this.state.graphPrice} company={this.state.name + ' (' + this.state.symbol + ')' + ' - ' + this.state.graphName}/> : ''}
             </div>
 
             <div className="col-md-1">
@@ -197,7 +264,7 @@ class Dashboard extends Component {
             </div>
           </div>
 
-          {this.state.selection ? <Bar /> : ''}
+          {this.state.selection ? <Bar func={this.handleBarEvent}/> : ''}
 
         </div>
       </div>

@@ -8,7 +8,7 @@ class Graph extends Component {
     this.state = {
       options: {
         chart: {
-          id: "Intraday Stock Time Series"
+          id: "Stock Time Series"
         },
         xaxis: {
           categories: this.props.times,

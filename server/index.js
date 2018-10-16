@@ -1,29 +1,36 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-// UNCOMMENT THE DATABASE YOU'D LIKE TO USE
-// var items = require('../database-mysql');
-// var items = require('../database-mongo');
+const express = require('express');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const passport = require('passport');
 
-var app = express();
+// ***********ADJUST
+const users = require('./routes/api/users');
+//const profile = require('./routes/api/profile');
+//const posts = require('./routes/api/posts');
 
-// UNCOMMENT FOR REACT
-// app.use(express.static(__dirname + '/../react-client/dist'));
+// Connect to DB
+const items = require('../database-mongo');
 
-// UNCOMMENT FOR ANGULAR
-// app.use(express.static(__dirname + '/../angular-client'));
-// app.use(express.static(__dirname + '/../node_modules'));
+const app = express();
 
-app.get('/items', function (req, res) {
-  items.selectAll(function(err, data) {
-    if(err) {
-      res.sendStatus(500);
-    } else {
-      res.json(data);
-    }
-  });
-});
+// Body parser middleware
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
-app.listen(3000, function() {
-  console.log('listening on port 3000!');
-});
+// Passport middleware
+app.use(passport.initialize());
+
+// Passport Config
+require('../config/passport')(passport);
+
+// ****************ADJUST Use Routes
+app.use('/api/users', users);
+//app.use('/api/profile', profile);
+//app.use('/api/posts', posts);
+
+app.use(express.static(__dirname + '/../react-client/dist'));
+
+const port = process.env.PORT || 3000;
+
+app.listen(port, () => console.log(`Server running on port ${port}`));
 

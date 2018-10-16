@@ -1,31 +1,32 @@
-var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/test');
+const mongoose = require('mongoose');
+const db = require('../config/keys').mongoURI;
 
-var db = mongoose.connection;
+const Schema = mongoose.Schema;
 
-db.on('error', function() {
-  console.log('mongoose connection error');
+// Connect to MongoDB
+mongoose
+  .connect(db)
+  .then(() => console.log('MongoDB Connected'))
+  .catch(err => console.log(err));
+
+// Create Schema
+const UserSchema = new Schema({
+  firstName: {
+    type: String,
+    required: true
+  },
+  lastName: {
+    type: String,
+    required: true
+  },
+  email: {
+    type: String,
+    required: true
+  },
+  password: {
+    type: String,
+    required: true
+  }
 });
 
-db.once('open', function() {
-  console.log('mongoose connected successfully');
-});
-
-var itemSchema = mongoose.Schema({
-  quantity: Number,
-  description: String
-});
-
-var Item = mongoose.model('Item', itemSchema);
-
-var selectAll = function(callback) {
-  Item.find({}, function(err, items) {
-    if(err) {
-      callback(err, null);
-    } else {
-      callback(null, items);
-    }
-  });
-};
-
-module.exports.selectAll = selectAll;
+module.exports = User = mongoose.model('users', UserSchema);

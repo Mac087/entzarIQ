@@ -66,11 +66,11 @@ class Login extends Component {
               <form onSubmit={this.onSubmit}>
                 
                  <div className="form-group">
-                  <input placeholder="Email" className="form-control form-control-lg" name="email" value={this.state.email} onChange={this.onChange}></input>
+                  <input autocomplete="off" placeholder="Email" className="form-control form-control-lg" name="email" value={this.state.email} onChange={this.onChange}></input>
                 </div>
 
                <div className="form-group">
-                  <input placeholder="Password" className="form-control form-control-lg" name="password" value={this.state.password} onChange={this.onChange}></input>
+                  <input autocomplete="off" placeholder="Password" className="form-control form-control-lg" name="password" value={this.state.password} onChange={this.onChange}></input>
                 </div>
 
                 <input type="submit" className="btn btn-info btn-block mt-4" />

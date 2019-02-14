@@ -53,19 +53,19 @@ class Register extends Component {
               <form noValidate onSubmit={this.onSubmit}>
 
                 <div className="form-group">
-                  <input placeholder="First Name" className="form-control form-control-lg" name="firstName" value={this.state.firstName} onChange={this.onChange}></input>
+                  <input autocomplete="off" placeholder="First Name" className="form-control form-control-lg" name="firstName" value={this.state.firstName} onChange={this.onChange}></input>
                 </div>
 
                 <div className="form-group">
-                  <input placeholder="Last Name" className="form-control form-control-lg" name="lastName" value={this.state.lastName} onChange={this.onChange}></input>
+                  <input autocomplete="off" placeholder="Last Name" className="form-control form-control-lg" name="lastName" value={this.state.lastName} onChange={this.onChange}></input>
                 </div>
 
                 <div className="form-group">
-                  <input placeholder="Email" className="form-control form-control-lg" name="email" value={this.state.email} onChange={this.onChange}></input>
+                  <input autocomplete="off" placeholder="Email" className="form-control form-control-lg" name="email" value={this.state.email} onChange={this.onChange}></input>
                 </div>
 
                 <div className="form-group">
-                  <input placeholder="Password" className="form-control form-control-lg" name="password" value={this.state.password} onChange={this.onChange}></input>
+                  <input autocomplete="off" placeholder="Password" className="form-control form-control-lg" name="password" value={this.state.password} onChange={this.onChange}></input>
                 </div>
 
                 <input type="submit" className="btn btn-info btn-block mt-4" />

@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 
 // Connect to MongoDB
 mongoose
-  .connect(db)
+  .connect(db, { useMongoClient: true })
   .then(() => console.log('MongoDB Connected'))
   .catch(err => console.log(err));
 

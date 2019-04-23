@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const passport = require('passport');
+const helmet = require('helmet');
 
 // ***********ADJUST
 const users = require('./routes/api/users');
@@ -16,6 +17,9 @@ const app = express();
 // Body parser middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+// Helmet middleware
+app.use(helmet());
 
 // Passport middleware
 app.use(passport.initialize());
@@ -33,4 +37,3 @@ app.use(express.static(__dirname + '/../react-client/dist'));
 const port = process.env.PORT || 3000;
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
-

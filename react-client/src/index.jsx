@@ -21,35 +21,35 @@ import Login from './components/Login.jsx';
 import Dashboard from './components/Dashboard.jsx';
 //-------------------------------------------
 
-class App extends React.Component {
+class App extends Component {
   constructor(props) {
     super(props);
-    this.state = { 
+    this.state = {
       items: []
     }
   }
 
-  render () {
+  render() {
     return (
-          <Router>
-            <div className="App">
-              <Navbar />
-              <Route exact path="/" component={Landing} />
+      <Router>
+        <div className="App">
+          <Navbar />
+          <Route exact path="/" component={Landing} />
 
-              <div className="container">
-                <Route exact path="/register" component={Register} />
-                <Route exact path="/login" component={Login} />
-                {/* <Route exact path="/profiles" component={Profiles} />
+          <div className="container">
+            <Route exact path="/register" component={Register} />
+            <Route exact path="/login" component={Login} />
+            {/* <Route exact path="/profiles" component={Profiles} />
                 <Route exact path="/profile/:handle" component={Profile} /> */}
-                <Switch>
-                  <PrivateRoute exact path="/dashboard" component={Dashboard} />
-                </Switch>
-              </div>
-              <Footer />
-            </div>
-          </Router>
-      );
-    
+            <Switch>
+              <PrivateRoute exact path="/dashboard" component={Dashboard} />
+            </Switch>
+          </div>
+          <Footer />
+        </div>
+      </Router>
+    );
+
   }
 }
 

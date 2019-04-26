@@ -5,23 +5,17 @@ const jwt = require('jsonwebtoken');
 const keys = require('../../../config/keys');
 const passport = require('passport');
 
-//************* Load Input Validation
-//const validateRegisterInput = require('../../validation/register');
-//const validateLoginInput = require('../../validation/login');
+// Load Input Validation
+const validateRegisterInput = require('../../../validation/register');
+const validateLoginInput = require('../../../validation/login');
 
 // Load User model
 const User = require('../../../database-mongo/index');
 
-// @route   GET api/users/test
-// @desc    Tests users route
-// @access  Public
-router.get('/test', (req, res) => res.json({ msg: 'Users Works' }));
-
 // @route   POST api/users/register
 // @desc    Register user
 // @access  Public
-router.post('/register', (req, res) => {
-  /* *************************
+router.post('/register', async (req, res) => {
   const { errors, isValid } = validateRegisterInput(req.body);
 
   // Check Validation
@@ -29,87 +23,77 @@ router.post('/register', (req, res) => {
     return res.status(400).json(errors);
   }
 
-  */
-  //**** delete errors below once validator is implemented
-  const errors = {};
-
-  User.findOne({ email: req.body.email }).then(user => {
+  try {
+    let user = await User.findOne({ email: req.body.email });
     if (user) {
       errors.email = 'Email already exists';
       return res.status(400).json(errors);
-    } else {
-      const newUser = new User({
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        email: req.body.email,
-        password: req.body.password
-      });
-
-      bcrypt.genSalt(10, (err, salt) => {
-        bcrypt.hash(newUser.password, salt, (err, hash) => {
-          if (err) throw err;
-          newUser.password = hash;
-          newUser
-            .save()
-            .then(user => res.json(user))
-            .catch(err => console.log(err));
-        });
-      });
     }
-  });
+
+    const newUser = new User({
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      email: req.body.email,
+      password: req.body.password
+    });
+
+    const salt = await bcrypt.genSalt(10);
+    newUser.password = await bcrypt.hash(newUser.password, salt);
+    const success = await newUser.save();
+    res.json(success);
+
+  } catch (e) {
+    console.log('error: ', e);
+    return res.status(500).json(e);
+  }
 });
 
 // @route   GET api/users/login
 // @desc    Login User / Returning JWT Token
 // @access  Public
-router.post('/login', (req, res) => {
-  /*
+router.post('/login', async (req, res) => {
   const { errors, isValid } = validateLoginInput(req.body);
 
   // Check Validation
   if (!isValid) {
     return res.status(400).json(errors);
   }
-  */
-
-  //**** delete errors below once validator is implemented
-  const errors = {};
 
   const email = req.body.email;
   const password = req.body.password;
 
-  // Find user by email
-  User.findOne({ email }).then(user => {
-    // Check for user
+  try {
+    let user = await User.findOne({ email });
     if (!user) {
       errors.email = 'User not found';
       return res.status(404).json(errors);
     }
 
-    // Check Password
-    bcrypt.compare(password, user.password).then(isMatch => {
-      if (isMatch) {
-        // User Matched
-        const payload = { id: user.id, firstName: user.firstName, lastName: user.lastName }; // Create JWT Payload
+    let isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      errors.password = 'Password incorrect';
+      return res.status(400).json(errors);
+    }
 
-        // Sign Token
-        jwt.sign(
-          payload,
-          keys.secretOrKey,
-          { expiresIn: 3600 },
-          (err, token) => {
-            res.json({
-              success: true,
-              token: 'Bearer ' + token
-            });
-          }
-        );
-      } else {
-        errors.password = 'Password incorrect';
-        return res.status(400).json(errors);
+    // User Matched
+    const payload = { id: user.id, firstName: user.firstName, lastName: user.lastName }; // Create JWT Payload
+
+    // Sign Token
+    jwt.sign(
+      payload,
+      keys.secretOrKey, { expiresIn: 3600 },
+      (err, token) => {
+        res.json({
+          success: true,
+          token: 'Bearer ' + token
+        });
       }
-    });
-  });
+    );
+
+  } catch (e) {
+    console.log('error: ', e);
+    return res.status(500).json(e);
+  }
 });
 
 // @route   GET api/users/current
